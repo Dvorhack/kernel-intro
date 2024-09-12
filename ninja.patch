@@ -1,0 +1,49 @@
+diff --git a/include/linux/thread_info.h b/include/linux/thread_info.h
+index 9ea0b2806..85e3d0518 100644
+--- a/include/linux/thread_info.h
++++ b/include/linux/thread_info.h
+@@ -236,7 +236,7 @@ static inline void copy_overflow(int size, unsigned long count)
+ static __always_inline __must_check bool
+ check_copy_size(const void *addr, size_t bytes, bool is_source)
+ {
+-	int sz = __builtin_object_size(addr, 0);
++	/*int sz = __builtin_object_size(addr, 0);
+ 	if (unlikely(sz >= 0 && sz < bytes)) {
+ 		if (!__builtin_constant_p(bytes))
+ 			copy_overflow(sz, bytes);
+@@ -248,7 +248,7 @@ check_copy_size(const void *addr, size_t bytes, bool is_source)
+ 	}
+ 	if (WARN_ON_ONCE(bytes > INT_MAX))
+ 		return false;
+-	check_object_size(addr, bytes, is_source);
++	check_object_size(addr, bytes, is_source);*/
+ 	return true;
+ }
+ 
+diff --git a/kernel/cred.c b/kernel/cred.c
+index 075cfa7c8..7103355c6 100644
+--- a/kernel/cred.c
++++ b/kernel/cred.c
+@@ -631,8 +631,8 @@ struct cred *prepare_kernel_cred(struct task_struct *daemon)
+ 	const struct cred *old;
+ 	struct cred *new;
+ 
+-	if (WARN_ON_ONCE(!daemon))
+-		return NULL;
++	// if (WARN_ON_ONCE(!daemon))
++	//	return NULL;
+ 
+ 	new = kmem_cache_alloc(cred_jar, GFP_KERNEL);
+ 	if (!new)
+@@ -640,7 +640,10 @@ struct cred *prepare_kernel_cred(struct task_struct *daemon)
+ 
+ 	kdebug("prepare_kernel_cred() alloc %p", new);
+ 
+-	old = get_task_cred(daemon);
++	if (daemon)
++		old = get_task_cred(daemon);
++	else
++		old = get_cred(&init_cred);
+ 
+ 	*new = *old;
+ 	new->non_rcu = 0;
